@@ -1,6 +1,6 @@
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-const { pool } = require('./database');
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import { pool } from './database.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
 const OTP_STORE = new Map(); // In production, use Redis
@@ -141,7 +141,7 @@ const verifyToken = (req, res, next) => {
   }
 };
 
-module.exports = {
+export {
   signup,
   login,
   requestOTP,

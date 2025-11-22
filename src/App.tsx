@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import LandingPage from './components/LandingPage';
 import Auth from './components/Auth';
 import Dashboard from './components/Dashboard';
 import Products from './components/Products';
@@ -17,12 +18,16 @@ export interface User {
 }
 
 function App() {
+  const [showLanding, setShowLanding] = useState(true);
+  const [showAuth, setShowAuth] = useState(false);
   const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (token) {
+      setShowLanding(false);
+      setShowAuth(false);
       fetchProfile();
     } else {
       setLoading(false);
@@ -55,12 +60,26 @@ function App() {
     localStorage.setItem('token', newToken);
     setToken(newToken);
     setUser(userData);
+    setShowLanding(false);
+    setShowAuth(false);
   };
 
   const handleLogout = () => {
     localStorage.removeItem('token');
     setToken(null);
     setUser(null);
+    setShowLanding(true);
+    setShowAuth(false);
+  };
+
+  const handleGetStarted = () => {
+    setShowLanding(false);
+    setShowAuth(true);
+  };
+
+  const handleBackToHome = () => {
+    setShowLanding(true);
+    setShowAuth(false);
   };
 
   if (loading) {
@@ -71,6 +90,17 @@ function App() {
     );
   }
 
+  // Show landing page first
+  if (showLanding && !token) {
+    return <LandingPage onGetStarted={handleGetStarted} />;
+  }
+
+  // Show auth page when user clicks get started
+  if (showAuth && !token) {
+    return <Auth onLogin={handleLogin} onBackToHome={handleBackToHome} />;
+  }
+
+  // If somehow we're here without a token, show auth
   if (!token || !user) {
     return <Auth onLogin={handleLogin} />;
   }

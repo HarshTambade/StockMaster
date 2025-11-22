@@ -1,7 +1,7 @@
-const express = require('express');
-const cors = require('cors');
-const { pool, initializeDatabase } = require('./database');
-const { signup, login, requestOTP, resetPassword, verifyToken } = require('./auth');
+import express from 'express';
+import cors from 'cors';
+import { pool, initializeDatabase } from './database.js';
+import { signup, login, requestOTP, resetPassword, verifyToken } from './auth.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -18,8 +18,15 @@ app.post('/api/auth/login', login);
 app.post('/api/auth/request-otp', requestOTP);
 app.post('/api/auth/reset-password', resetPassword);
 
-// Protected routes
-app.use('/api/*', verifyToken);
+// Protected routes middleware - applies to all routes except auth
+const protectedRoute = (req, res, next) => {
+  if (req.path.startsWith('/api/auth')) {
+    return next();
+  }
+  return verifyToken(req, res, next);
+};
+
+app.use('/api/', protectedRoute);
 
 // Dashboard KPIs
 app.get('/api/dashboard/kpis', async (req, res) => {
